@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pays d'Afrique</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    padding:20px;
+    background:#f4f4f4;
+    transition: background 0.3s;
+}
+
+body.dark{
+    background:#111;
+    color:white;
+}
+
+h1{text-align:center;}
+
+.topbar{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-bottom:15px;
+    max-width:800px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+input, select{
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+input{
+    flex:1;
+    min-width:200px;
+}
+
+body.dark input, body.dark select{
+    background:#222;
+    color:white;
+    border-color:#444;
+}
+
+button{
+    padding:10px 15px;
+    cursor:pointer;
+    border:1px solid #ccc;
+    border-radius:5px;
+    background:#fff;
+}
+
+body.dark button{
+    background:#222;
+    color:white;
+    border-color:#444;
+}
+
+ul{
+    list-style:none;
+    padding:0;
+    max-width:800px;
+    margin:auto;
+}
+
+li{
+    background:white;
+    margin:10px 0;
+    border-radius:10px;
+    cursor:pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+body.dark li{background:#222;}
+
+a{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px;
+    text-decoration:none;
+    color:inherit;
+}
+
+.flag{width:40px; border-radius:3px;}
+
+#detailView{
+    display:none;
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+body.dark #detailView{background:#222;}
+
+#flagDetail{
+    width:200px;
+    display:block;
+    margin:15px 0;
+    border-radius:5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+</style>
+</head>
+
+<body>
+
+<h1>Pays d'Afrique</h1>
+
+<div class="topbar">
+    <input id="search" placeholder="Rechercher un pays">
+    <select id="filterRegion">
+        <option value="Tous">Toutes les régions</option>
+        <option value="Nord">Afrique du Nord</option>
+        <option value="Ouest">Afrique de l'Ouest</option>
+        <option value="Centrale">Afrique Centrale</option>
+        <option value="Est">Afrique de l'Est</option>
+        <option value="Australe">Afrique Australe</option>
+    </select>
+    <button onclick="toggleTheme()">Mode</button>
+</div>
+
+<div id="listView">
+    <ul id="list"></ul>
+</div>
+
+<div id="detailView">
+    <button onclick="back()">← Retour</button>
+    <h2 id="name"></h2>
+    <img id="flagDetail" alt="Drapeau détaillé">
+    <p><b>Capitale:</b> <span id="cap"></span></p>
+    <p><b>Population:</b> <span id="pop"></span></p>
+    <p><b>Superficie:</b> <span id="area"></span></p>
+    <p><b>Langue:</b> <span id="lang"></span></p>
+    <p><b>Monnaie:</b> <span id="cur"></span></p>
+    <p><b>Région:</b> <span id="reg"></span></p>
+</div>
+
+<script>
+const countries = [
+{n:"Afrique du Sud",c:"za",cap:"Pretoria",p:"60M",a:"1 221 037 km²",l:"11 langues",m:"ZAR",r:"Australe"},
+{n:"Algérie",c:"dz",cap:"Alger",p:"45M",a:"2 381 741 km²",l:"Arabe",m:"Dinar",r:"Nord"},
+{n:"Angola",c:"ao",cap:"Luanda",p:"36M",a:"1 246 700 km²",l:"Portugais",m:"Kwanza",r:"Centrale"},
+{n:"Bénin",c:"bj",cap:"Porto-Novo",p:"13M",a:"114 763 km²",l:"Français",m:"CFA",r:"Ouest"},
+{n:"Botswana",c:"bw",cap:"Gaborone",p:"2M",a:"581 730 km²",l:"Anglais",m:"Pula",r:"Australe"},
+{n:"Burkina Faso",c:"bf",cap:"Ouagadougou",p:"23M",a:"274 200 km²",l:"Français",m:"CFA",r:"Ouest"},
+{n:"Burundi",c:"bi",cap:"Gitega",p:"13M",a:"27 834 km²",l:"Kirundi",m:"BIF",r:"Est"},
+{n:"Cameroun",c:"cm",cap:"Yaoundé",p:"28M",a:"475 442 km²",l:"Français/Anglais",m:"CFA",r:"Centrale"},
+{n:"Cap-Vert",c:"cv",cap:"Praia",p:"0.6M",a:"4 033 km²",l:"Portugais",m:"CVE",r:"Ouest"},
+{n:"Centrafrique",c:"cf",cap:"Bangui",p:"5M",a:"622 984 km²",l:"Français",m:"CFA",r:"Centrale"},
+{n:"Comores",c:"km",cap:"Moroni",p:"0.8M",a:"2 235 km²",l:"Comorien",m:"KMF",r:"Est"},
+{n:"Congo",c:"cg",cap:"Brazzaville",p:"6M",a:"342 000 km²",l:"Français",m:"CFA",r:"Centrale"},
+{n:"Côte d’Ivoire",c:"ci",cap:"Yamoussoukro",p:"29M",a:"322 463 km²",l:"Français",m:"CFA",r:"Ouest"},
+{n:"Djibouti",c:"dj",cap:"Djibouti",p:"1M",a:"23 200 km²",l:"Français/Arabe",m:"DJF",r:"Est"},
+{n:"Égypte",c:"eg",cap:"Le Caire",p:"112M",a:"1 010 408 km²",l:"Arabe",m:"EGP",r:"Nord"},
+{n:"Érythrée",c:"er",cap:"Asmara",p:"3M",a:"117 600 km²",l:"Tigrinya",m:"ERN",r:"Est"},
+{n:"Eswatini",c:"sz",cap:"Mbabane",p:"1M",a:"17 364 km²",l:"Swati",m:"SZL",r:"Australe"},
+{n:"Éthiopie",c:"et",cap:"Addis-Abeba",p:"126M",a:"1 104 300 km²",l:"Amharique",m:"ETB",r:"Est"},
+{n:"Gabon",c:"ga",cap:"Libreville",p:"2M",a:"267 668 km²",l:"Français",m:"CFA",r:"Centrale"},
+{n:"Gambie",c:"gm",cap:"Banjul",p:"2M",a:"11 300 km²",l:"Anglais",m:"GMD",r:"Ouest"},
+{n:"Ghana",c:"gh",cap:"Accra",p:"34M",a:"238 533 km²",l:"Anglais",m:"GHS",r:"Ouest"},
+{n:"Guinée",c:"gn",cap:"Conakry",p:"14M",a:"245 857 km²",l:"Français",m:"GNF",r:"Ouest"},
+{n:"Guinée-Bissau",c:"gw",cap:"Bissau",p:"2M",a:"36 125 km²",l:"Portugais",m:"CFA",r:"Ouest"},
+{n:"Guinée équatoriale",c:"gq",cap:"Malabo",p:"1M",a:"28 051 km²",l:"Espagnol",m:"CFA",r:"Centrale"},
+{n:"Kenya",c:"ke",cap:"Nairobi",p:"55M",a:"580 367 km²",l:"Swahili/Anglais",m:"KES",r:"Est"},
+{n:"Lesotho",c:"ls",cap:"Maseru",p:"2M",a:"30 355 km²",l:"Sesotho",m:"LSL",r:"Australe"},
+{n:"Liberia",c:"lr",cap:"Monrovia",p:"5M",a:"111 369 km²",l:"Anglais",m:"LRD",r:"Ouest"},
+{n:"Libye",c:"ly",cap:"Tripoli",p:"6M",a:"1 759 540 km²",l:"Arabe",m:"LYD",r:"Nord"},
+{n:"Madagascar",c:"mg",cap:"Antananarivo",p:"30M",a:"587 041 km²",l:"Malgache",m:"MGA",r:"Est"},
+{n:"Malawi",c:"mw",cap:"Lilongwe",p:"20M",a:"118 484 km²",l:"Anglais",m:"MWK",r:"Est"},
+{n:"Mali",c:"ml",cap:"Bamako",p:"23M",a:"1 240 192 km²",l:"Français",m:"CFA",r:"Ouest"},
+{n:"Maroc",c:"ma",cap:"Rabat",p:"37M",a:"446 550 km²",l:"Arabe",m:"MAD",r:"Nord"},
+{n:"Maurice",c:"mu",cap:"Port-Louis",p:"1M",a:"2 040 km²",l:"Français",m:"MUR",r:"Est"},
+{n:"Mauritanie",c:"mr",cap:"Nouakchott",p:"4M",a:"1 030 700 km²",l:"Arabe",m:"MRU",r:"Nord"},
+{n:"Mozambique",c:"mz",cap:"Maputo",p:"33M",a:"799 380 km²",l:"Portugais",m:"MZN",r:"Est"},
+{n:"Namibie",c:"na",cap:"Windhoek",p:"2M",a:"824 292 km²",l:"Anglais",m:"NAD",r:"Australe"},
+{n:"Niger",c:"ne",cap:"Niamey",p:"26M",a:"1 267 000 km²",l:"Français",m:"CFA",r:"Ouest"},
+{n:"Nigeria",c:"ng",cap:"Abuja",p:"223M",a:"923 768 km²",l:"Anglais",m:"NGN",r:"Ouest"},
+{n:"Ouganda",c:"ug",cap:"Kampala",p:"48M",a:"241 038 km²",l:"Anglais",m:"UGX",r:"Est"},
+{n:"RD Congo",c:"cd",cap:"Kinshasa",p:"102M",a:"2 344 858 km²",l:"Français",m:"CDF",r:"Centrale"},
+{n:"Rwanda",c:"rw",cap:"Kigali",p:"14M",a:"26 338 km²",l:"Kinyarwanda",m:"RWF",r:"Est"},
+{n:"Sao Tomé-et-Principe",c:"st",cap:"São Tomé",p:"0.2M",a:"964 km²",l:"Portugais",m:"STN",r:"Centrale"},
+{n:"Sénégal",c:"sn",cap:"Dakar",p:"17M",a:"196 722 km²",l:"Français",m:"CFA",r:"Ouest"},
+{n:"Seychelles",c:"sc",cap:"Victoria",p:"0.1M",a:"459 km²",l:"Créole",m:"SCR",r:"Est"},
+{n:"Sierra Leone",c:"sl",cap:"Freetown",p:"8M",a:"71 740 km²",l:"Anglais",m:"SLL",r:"Ouest"},
+{n:"Somalie",c:"so",cap:"Mogadiscio",p:"18M",a:"637 657 km²",l:"Somali",m:"SOS",r:"Est"},
+{n:"Soudan",c:"sd",cap:"Khartoum",p:"48M",a:"1 886 068 km²",l:"Arabe",m:"SDG",r:"Nord"},
+{n:"Soudan du Sud",c:"ss",cap:"Juba",p:"11M",a:"619 745 km²",l:"Anglais",m:"SSP",r:"Est"},
+{n:"Tanzanie",c:"tz",cap:"Dodoma",p:"67M",a:"945 087 km²",l:"Swahili",m:"TZS",r:"Est"},
+{n:"Tchad",c:"td",cap:"N'Djamena",p:"17M",a:"1 284 000 km²",l:"Français/Arabe",m:"CFA",r:"Centrale"},
+{n:"Togo",c:"tg",cap:"Lomé",p:"9M",a:"56 785 km²",l:"Français",m:"CFA",r:"Ouest"},
+{n:"Tunisie",c:"tn",cap:"Tunis",p:"12M",a:"163 610 km²",l:"Arabe",m:"TND",r:"Nord"},
+{n:"Zambie",c:"zm",cap:"Lusaka",p:"20M",a:"752 612 km²",l:"Anglais",m:"ZMW",r:"Australe"},
+{n:"Zimbabwe",c:"zw",cap:"Harare",p:"16M",a:"390 757 km²",l:"Anglais",m:"ZWL",r:"Australe"}
+];
+
+// Tri alphabétique initial prenant en compte les caractères accentués
+countries.sort((a, b) => a.n.localeCompare(b.n, 'fr'));
+
+let data = [...countries];
+
+function render(){
+    const list = document.getElementById("list");
+    
+    const htmlContent = data.map(x => `
+        <li onclick="openC('${x.n.replace(/'/g, "\\'")}')">
+            <a>
+                <img class="flag" src="https://flagcdn.com{x.c}.png" alt="Drapeau ${x.n}">
+                ${x.n}
+            </a>
+        </li>
+    `).join('');
+    
+    list.innerHTML = htmlContent;
+}
+
+function openC(n){
+    let x = countries.find(e => e.n === n);
+    if (!x) return;
+
+    document.getElementById("listView").style.display = "none";
+    document.getElementById("detailView").style.display = "block";
+
+    document.getElementById("name").innerText = x.n;
+    document.getElementById("flagDetail").src = `https://flagcdn.com{x.c}.png`;
+    document.getElementById("cap").innerText = x.cap;
+    document.getElementById("pop").innerText = x.p;
+    document.getElementById("area").innerText = x.a;
+    document.getElementById("lang").innerText = x.l;
+    document.getElementById("cur").innerText = x.m;
+    document.getElementById("reg").innerText = x.r;
+}
+
+function back(){
+    document.getElementById("listView").style.display = "block";
+    document.getElementById("detailView").style.display = "none";
+}
+
+function toggleTheme(){
+    document.body.classList.toggle("dark");
+}
+
+function updateList() {
+    const searchVal = document.getElementById("search").value.toLowerCase();
+    const regionVal = document.getElementById("filterRegion").value;
+    
+    data = countries.filter(x => {
+        const matchesSearch = x.n.toLowerCase().includes(searchVal);
+        const matchesRegion = (regionVal === "Tous" || x.r === regionVal);
+        return matchesSearch && matchesRegion;
+    });
+    
+    render();
+}
+
+document.getElementById("search").addEventListener("input", updateList);
+document.getElementById("filterRegion").addEventListener("change", updateList);
+
+render();
+</script>
+
+</body>    
+</html>
